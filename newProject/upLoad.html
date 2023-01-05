@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>upload</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+                                rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+                                crossorigin="anonymous">
+    <script src="jsUploat.js"></script>
+    <link rel="stylesheet" href="css/uploand.css">
+    <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="name.." aria-label="Recipient's username"
+                   aria-describedby="basic-addon2" id="name">
+            <span class="input-group-text" >Name</span>
+        </div>
+    </div>
+    <div class="input-group mb-3">
+        <input type="number" class="form-control" placeholder="Price..." aria-label="Recipient's username"
+               aria-describedby="basic-addon2"id="price" >
+        <span class="input-group-text" >Price</span>
+    </div>
+    <progress value="0" max="100" id="uploader">0%</progress>
+    <input type="file" value="upload" accept=".jpg" id="fileButton">
+    <div id="imgDiv"></div>
+    <button class="btn btn-success" onclick="createProduct()" >Create Product</button>
+</div>
+<!--<form class="creat">-->
+<!--  Product name:<input id="name" type="text"><br>-->
+<!--    price: <input type="number" id="uprice"><br>-->
+<!--    <button onclick="createProduct()">Create</button>-->
+<!--</form>-->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label  class="col-form-label">Product Name</label>
+                        <input type="text" class="form-control" id="up_name">
+                    </div>
+                    <div class="mb-3">
+                        <label  class="col-form-label">Price</label>
+                        <input type="text" class="form-control" id="up_price">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" onclick="upProduct()" class="btn btn-primary">up load</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--ten san pham<input type="text" placeholder="ten" id="name"><br>-->
+<!--anh <input type="text" id="anh" placeholder="tenanh"><br>-->
+<!--gia tien<input type="number" id="giatien" placeholder="giatien"><br>-->
+<!--<button onclick="createProduct()">them</button>-->
+<table  style=" width: 100%">
+    <tr >
+        <th > stt</th>
+        <th >Product</th>
+        <th >Price</th>
+        <th >Edit</th>
+        <th >Delete</th>
+    </tr>
+    <tbody id="drawTable"></tbody>
+</table>
+<a href="index.html"><button style="margin-left: 45%;background-color: darkturquoise;width: 100px">Home</button></a>
+<script>
+let id;
+let listElement=JSON.parse(localStorage.getItem('list_element'));
+if (listElement==null){
+    listElement=[];
+}
+function showListElement(){
+    let drawTable='';
+    for (let i=0;i<listElement.length;i++) {
+        drawTable += `<tr>
+<td>${i + 1}</td>
+<td>${listElement[i].name}</td>
+
+<td>${listElement[i].price}</td>
+<td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="upData(${listElement[i].id})" data-bs-whatever="@mdo">Edit</button></td>
+<td><button style="background-color: red; color: white"  onclick="deleteProduct(` + i + `)">Delete</button></td>
+</tr>`
+    }
+        // <td>${listElement[i].image}</td>
+document.getElementById('drawTable').innerHTML=drawTable;
+
+}
+showListElement();
+function createProduct() {
+    let name=document.getElementById('name').value;
+    let nameImage=getImage();
+    let price=+document.getElementById('price').value;
+    let  productName= new Product(name,nameImage,price);
+    listElement.push(productName);
+    localStorage.removeItem('list_element');
+    localStorage.setItem('list_element',JSON.stringify(listElement))
+    showListElement();
+}
+function findById(id) {
+    for (let i = 0; i < listElement.length; i++) {
+        if (id === listElement[i].id) {
+            return listElement[i];
+        }
+    }
+
+}
+function upData(i) {
+    let element=findById(i);
+    id=i;
+    document.getElementById('up_name').value=element.name;
+    document.getElementById('up_img').value=element.image;
+    document.getElementById('up_price').value=element.price;
+
+}
+
+function upProduct() {
+let upElement = findById(id);
+let upName=document.getElementById('up_name').value;
+let upImage=getImage();
+let upPrice=+document.getElementById('up_price').value;
+upElement.name=upName;
+upElement.image=upImage;
+upElement.price=upPrice;
+    localStorage.removeItem('list_element');
+    localStorage.setItem('list_element',JSON.stringify(listElement))
+    showListElement();
+}
+function deleteProduct(index) {
+if(confirm('bạn muốn xóa không')){
+    listElement.splice(index,1);
+}
+    localStorage.removeItem('list_element');
+    localStorage.setItem('list_element',JSON.stringify(listElement))
+    showListElement();
+}
+</script>
+<script src="Ursefirebass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+</html>
